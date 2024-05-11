@@ -1,0 +1,11 @@
+window = None
+directory = None
+pack = None
+base_path = None
+normalIntensity = 1
+heightIntensity = 0.1
+done = False
+textures_data = None
+normals = []
+speculars = []
+fastSpecular = False

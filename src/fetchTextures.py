@@ -1,7 +1,8 @@
 import os
 from os import listdir
-from os.path import isfile, join
+from os.path import isfile, isdir, join
 from src.Texture import texture
+import src.vars as gvars
 
 excluded_names = [
     "blast_furnace_front_on.png",
@@ -18,15 +19,11 @@ excluded_names = [
     "crimson_stem.png",
     "fire_0.png",
     "fire_1.png",
-    "glowstone.png",
     "kelp.png",
     "kelp_plant.png",
-    "lantern.png",
     "lava_flow.png",
     "lava_still.png",
-    "magma.png",
     "nether_portal.png",
-    "prismarine.png",
     "pumpkin_face_on.png",
     "redstone_lamp_on.png",
     "repeating_command_block_back.png",
@@ -34,41 +31,44 @@ excluded_names = [
     "repeating_command_block_front.png",
     "repeating_command_block_side.png",
     "respawn_anchor_top.png",
-    "sea_lantern.png",
     "seagrass.png",
     "smoker_front_on.png",
     "soul_campfire_fire.png",
     "soul_campfire_log_lit.png",
     "soul_fire_0.png",
     "soul_fire_1.png",
-    "soul_lantern.png",
     "stonecutter_saw.png",
     "tall_seagrass_bottom.png",
     "tall_seagrass_top.png",
     "warped_stem.png",
     "water_flow.png",
     "water_still.png",
-    ""
 ]
 
-def listTextures(window, textures, path):
-    files = [f for f in listdir(path)]
-    i = 1;
-    for file in files:
-        window['progress'].update(i, len(files))
-        if (os.path.isdir(join(path, file)) == True):
-            listTextures(window, textures, join(path, file))
-        elif ("png" in file and ("mcmeta" not in file) and (file not in excluded_names) and os.path.isfile(join(path, file))):
-            textures.append(texture(path + "/", file.split('.')[0], '.' + file.split('.')[1]))
-        i = i+1
+def listTextures(normals, speculars, path):
+    if isdir(path) == True:
+        files = [f for f in listdir(path)]
+        i = 1;
+        for file in files:
+            gvars.window['progress'].update(i, len(files))
+            if (os.path.isdir(join(path, file)) == True):
+                listTextures(normals, speculars, join(path, file))
+            elif ("png" in file and "sapling" not in file and ("mcmeta" not in file) and (file not in excluded_names)and os.path.isfile(join(path, file))):
+                if file.split('.')[0] in gvars.normals:
+                    normals.append(texture(path + "/", file.split('.')[0], '.' + file.split('.')[1]))
+                if file.split('.')[0] in gvars.speculars:
+                    speculars.append(texture(path + "/", file.split('.')[0], '.' + file.split('.')[1]))
+            i = i+1
 
-def getTextures(window, base_path):
-    textures = []
-    window['state'].update(value="Fetching textures")
-    texture_path = os.path.join(base_path, os.path.join('pack_unziped', 'assets', 'minecraft', 'textures'))
-    print("texture_path :", texture_path)
-    listTextures(window, textures, os.path.join(texture_path, 'block'))
-    #listTextures(window, textures, os.path.join(texture_path, 'block_alt'))
-    listTextures(window, textures, os.path.join(texture_path, 'item'))
-    #listTextures(window, textures, os.path.join(texture_path, 'item_alt'))
-    return textures
+def getTextures():
+    normals = []
+    speculars = []
+    gvars.window['state'].update(value="Fetching textures")
+    texture_path = os.path.join(gvars.base_path, os.path.join('pack_unziped', 'assets', 'minecraft', 'textures'))
+    listTextures(normals, speculars, os.path.join(texture_path, "blocks"))
+    listTextures(normals, speculars, os.path.join(texture_path, "block"))
+    listTextures(normals, speculars, os.path.join(texture_path, "items"))
+    listTextures(normals, speculars, os.path.join(texture_path, "item"))
+    # listTextures(normals, speculars, os.path.join(texture_path, "entities"))
+    # listTextures(normals, speculars, os.path.join(texture_path, "entity"))
+    return {'normals': normals, 'speculars': speculars}
