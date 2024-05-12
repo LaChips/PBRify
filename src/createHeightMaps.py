@@ -1,7 +1,11 @@
 import cv2
 from pylab import array, arange, uint8
-import src.vars as gvars
 import math
+from src.vars import Config, AppState
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.pbrify import Converter  # This import is only for type checking
 
 # None of the 3 attemps below are satisfying
 #
@@ -55,12 +59,14 @@ import math
 # #                     continue
 # #     return HM
 
-def createHeightMaps(textures):
-    gvars.window['state'].update(value="Generating height maps")
+def createHeightMaps(textures, converter : 'Converter'):
+    app = converter.app
+    config = converter.config
+    app.updateStateText("Generating height maps")
     for i in range(0, len(textures)):
-        if textures[i].name not in gvars.normals:
+        if textures[i].name not in converter.normals:
             continue
-        gvars.window['progress'].update(i + 1, len(textures))
+        app.updateProgressBar(i + 1, len(textures))
         try:
             normal = cv2.imread(textures[i].path + textures[i].name + "_n" + textures[i].ext)
         except:
@@ -70,10 +76,10 @@ def createHeightMaps(textures):
         diffuse = cv2.imread(textures[i].path + textures[i].name + textures[i].ext, 0)
         diffuse[diffuse < 255-50] += 50
         maxIntensity = 255.0 # depends on dtype of image data
-        x = arange(maxIntensity) 
+        x = arange(maxIntensity)
         phi = 1
         theta = 1
-        toHeightMap = (maxIntensity/phi)*(diffuse/(maxIntensity/theta))**gvars.heightIntensity
+        toHeightMap = (maxIntensity/phi)*(diffuse/(maxIntensity/theta))**config.heightIntensity
         heightMap = array(toHeightMap,dtype=uint8)
         # try:
         #     print("smoothing edges of " + textures[i].name)

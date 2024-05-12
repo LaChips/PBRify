@@ -7,50 +7,72 @@ import scipy.ndimage
 from scipy import ndimage
 import json
 import argparse
-import PySimpleGUI as sg
 from PySimpleGUI import FileBrowse, ProgressBar
-from src.pbrify import start
+from src.pbrify import Converter
 from src.initWindow import initWindow
-import src.vars as gvars
+from src.vars import Config, AppState
 from multiprocessing import Process
 
 def main():
+
+    config = Config()
+    app = AppState()
+
     try:
-        gvars.base_path = sys._MEIPASS
+        config.base_path = sys._MEIPASS
     except Exception:
-        gvars.base_path = os.path.abspath(".")
-    gvars.window = initWindow()
+        config.base_path = os.path.abspath(".")
+
+    app.window = initWindow()
+    app.window.close_destroys_window = True
+
     with open('./lib/normals_to_convert.json', 'r') as normalsToConvertRaw:
-        gvars.normals = json.load(normalsToConvertRaw)
+        config.normals = json.load(normalsToConvertRaw)
+
     with open('./lib/speculars_to_convert.json', 'r') as specularsToConvertRaw:
-        gvars.speculars = json.load(specularsToConvertRaw)
-    while True:
-        event, values = gvars.window.read(timeout=0)
-        if event == sg.WIN_CLOSED or event == 'Cancel': # if user closes window or clicks cancel
+        config.speculars = json.load(specularsToConvertRaw)
+
+    while app.window is not None:
+        event, values = app.window.read(timeout=0)
+
+        # If the window is closed, close the app
+        if event is None:
             break
+
+        if event == 'Cancel':
+            app.window.close()
+
         elif event == '-FOLDER-':
-           gvars.directory = values['-FOLDER-']
+           config.directory = values['-FOLDER-']
+
         elif event == "-PACK-":
-           gvars.pack = values['-PACK-']
+           config.pack = values['-PACK-']
+
         elif event == "-NORMAL-":
-            gvars.normalIntensity = values['-NORMAL-']
+            config.normalIntensity = values['-NORMAL-']
+
         elif event == "-HEIGHT-":
-            gvars.heightIntensity = values['-HEIGHT-']
+            config.heightIntensity = values['-HEIGHT-']
+
         elif event == "-FAST-":
-            gvars.fastSpecular = values['-FAST-']
-        elif event == "-CONVERT-" and gvars.pack != None and gvars.directory != None:
-            start()
+            config.fastSpecular = values['-FAST-']
+
+        elif event == "-CONVERT-" and config.pack != None and config.directory != None:
+            # Initialize a new conversion process
+            converter = Converter(config, app)
+            converter.start()
+            app.window['-CONVERT-'].update(disabled=True)
         elif event == '-EXIT-':
-            break
-        elif gvars.done == True:
-            gvars.done = False
-            os.remove(os.path.join(gvars.base_path, 'pack.zip'))
-            shutil.rmtree(os.path.join(gvars.base_path, 'pack_unziped'), ignore_errors=True)
-            gvars.window['state'].update(value="Done!")
-            gvars.window['-CONVERT-'].update(visible=False)
-            gvars.window['-CANCEL-'].update(visible=False)
-            gvars.window['-EXIT-'].update(visible=True)
-    gvars.window.close()
+            app.window.close()
+
+        elif app.done == True:
+            app.done = False
+            os.remove(os.path.join(config.base_path, 'pack.zip'))
+            shutil.rmtree(os.path.join(config.base_path, 'pack_unziped'), ignore_errors=True)
+            app.window['state'].update(value="Done!")
+            app.window['-CONVERT-'].update(visible=False)
+            app.window['-CANCEL-'].update(visible=False)
+            app.window['-EXIT-'].update(visible=True)
 
 if __name__ == '__main__':
     main()

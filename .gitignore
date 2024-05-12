@@ -1,0 +1,8 @@
+# Ignore everything aside from src, lib and main content
+*
+!lib
+!src
+!main.py
+!requirements.txt
+!README.md
+!.gitignore
