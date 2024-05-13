@@ -55,12 +55,11 @@ import math
 # #                     continue
 # #     return HM
 
-def createHeightMaps(textures):
-    gvars.window['state'].update(value="Generating height maps")
+def threaded_process(textures):
     for i in range(0, len(textures)):
-        if textures[i].name not in gvars.normals:
+        if textures[i].name not in gvars.normals or textures[i].name in gvars.blocks_to_ignore:
             continue
-        gvars.window['progress'].update(i + 1, len(textures))
+        gvars.window.write_event_value(('-HEIGHT-GENERATION-', textures[i].name + ':' + str(i)), textures[i].name + ':' + str(i))
         try:
             normal = cv2.imread(textures[i].path + textures[i].name + "_n" + textures[i].ext)
         except:
@@ -91,3 +90,7 @@ def createHeightMaps(textures):
             i = i+1
             continue
         i = i+1
+    #gvars.window.write_event_value(('-THREAD-', '-HEIGHT-THREAD-ENDED-'), '-HEIGHT-THREAD-ENDED-')
+
+def createHeightMaps(textures):
+    gvars.window.start_thread(lambda: threaded_process(textures), ('-THREAD-', '-HEIGHT-THREAD-ENDED-'))

@@ -48,7 +48,7 @@ excluded_names = [
 def listTextures(normals, speculars, path):
     if isdir(path) == True:
         files = [f for f in listdir(path)]
-        i = 1;
+        i = 1
         for file in files:
             gvars.window['progress'].update(i, len(files))
             if (os.path.isdir(join(path, file)) == True):

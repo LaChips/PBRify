@@ -75,7 +75,6 @@ def getSpecularForColor(texture_name, color, textures_data):
         return (0, 0, 0)
 
 def processTexture(texture, i, textures_data):
-    print("texture.name :", texture.name)
     diffuse = None
     try:
         diffuse = Image.open(r"" + os.path.join(texture.path, texture.name + texture.ext), 'r', ['png']).convert('RGB')
@@ -95,11 +94,18 @@ def processTexture(texture, i, textures_data):
             return
     img.save(texture.path + texture.name + '_s' + texture.ext)
 
-def createSpecularMaps(textures):
-    print("fastSpecular :", gvars.fastSpecular)
-    gvars.window['state'].update(value="Generating specular maps")
+def threaded_process(textures):
     for i in range(0, len(textures)):
-        gvars.window['progress'].update(i + 1, len(textures))
-        gvars.window['state'].update(value="Generating specular map for " + textures[i].name)
+        if textures[i].name in gvars.blocks_to_ignore:
+            continue
+        gvars.window.write_event_value(('-SPECULAR-GENERATION-', textures[i].name + ':' + str(i)), textures[i].name + ':' + str(i))
         processTexture(textures[i], i, gvars.textures_data)
-        
+    #gvars.window.write_event_value(('-THREAD-', '-SPECULAR-THREAD-ENDED-'), '-SPECULAR-THREAD-ENDED-')
+
+def createSpecularMaps(textures):
+    gvars.window.start_thread(lambda: threaded_process(textures), ('-THREAD-', '-SPECULAR-THREAD-ENDED-'))
+
+def createSpecularMap(texture):
+    gvars.window['progress'].update(i + 1, len(textures))
+    gvars.window['state'].update(value="Generating specular map for " + textures[i].name)
+    processTexture(textures[i], i, gvars.textures_data)

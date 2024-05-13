@@ -102,14 +102,19 @@ def toNormal(texture):
     normal_map = compute_normal_map(sobel_x, sobel_y)
     imageio.imwrite(output_file, normal_map)
 
-def createNormals(textures):
-    gvars.window['state'].update(value="Generating normal maps")
+def threaded_process(textures):
     for i in range(0, len(textures)):
-        gvars.window['progress'].update(i + 1, len(textures))
-        if textures[i].name not in gvars.normals:
+        gvars.window.write_event_value(('-NORMAL-GENERATION-', textures[i].name + ':' + str(i)), textures[i].name + ':' + str(i))
+        #gvars.window['progress'].update(i + 1, len(textures))
+        if textures[i].name not in gvars.normals or textures[i].name in gvars.blocks_to_ignore:
             continue
         try:
             toNormal(textures[i])
         except SyntaxError:
             print("Broken png file : " + textures[i].path + textures[i].name + textures[i].ext)
         i = i+1
+    #gvars.window.write_event_value(('-THREAD-', '-NORMAL-THREAD-ENDED-'), '-NORMAL-THREAD-ENDED-')
+
+def createNormals(textures):
+    #gvars.window['state'].update(value="Generating normal maps")
+    gvars.window.start_thread(lambda: threaded_process(textures), ('-THREAD-', '-NORMAL-THREAD-ENDED-'))
