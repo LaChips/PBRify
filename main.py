@@ -11,12 +11,14 @@ from PySimpleGUI import FileBrowse, ProgressBar
 from src.pbrify import Converter
 from src.initWindow import initWindow
 from src.vars import Config, AppState
-from multiprocessing import Process
+from threading import Thread
+
 
 def main():
 
     config = Config()
     app = AppState()
+    converter = None
 
     try:
         config.base_path = sys._MEIPASS
@@ -61,7 +63,7 @@ def main():
             # Initialize a new conversion process
             converter = Converter(config, app)
             converter.start()
-            app.window['-CONVERT-'].update(disabled=True)
+
         elif event == '-EXIT-':
             app.window.close()
 
@@ -73,6 +75,7 @@ def main():
             app.window['-CONVERT-'].update(visible=False)
             app.window['-CANCEL-'].update(visible=False)
             app.window['-EXIT-'].update(visible=True)
+
 
 if __name__ == '__main__':
     main()

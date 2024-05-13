@@ -10,6 +10,8 @@ class Texture:
         self.thumbnail_dir = os.path.join(path, 'thumbnails')
         self.thumbnail_path = os.path.join(self.thumbnail_dir, f"{name}_thumb{ext}")
         self.ext = ext
+        self.generate_normal = False
+        self.generate_specular = False
 
     # Create a thumbnail of the texture to display in GUI
     def create_thumbnail(self, size=(64, 64)):

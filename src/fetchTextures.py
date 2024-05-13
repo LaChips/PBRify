@@ -57,33 +57,35 @@ class TextureFetcher:
         self.config = converter.config
         self.base_path = self.config.base_path
 
-    def listTextures(self, normals, speculars, path):
+    def listTextures(self, textures, normals, speculars, path):
         if isdir(path):
             files = [f for f in listdir(path)]
             i = 1
             for file in files:
                 self.app.updateProgressBar(i, len(files))
                 if isdir(join(path, file)):
-                    self.listTextures(normals, speculars, join(path, file))
+                    self.listTextures(textures, normals, speculars, join(path, file))
                 elif "png" in file and "sapling" not in file and "mcmeta" not in file and file not in excluded_names and isfile(join(path, file)):
                     texture_obj = Texture(path + "/", file.split('.')[0], '.' + file.split('.')[1])
-                    texture_obj.create_thumbnail()  # Generate thumbnail here
+                    # texture_obj.create_thumbnail()  # Generate thumbnail here
                     if file.split('.')[0] in self.config.normals:
-                        normals.append(texture_obj)
+                        texture_obj.generate_normal = True
                     if file.split('.')[0] in self.config.speculars:
-                        speculars.append(texture_obj)
+                        texture_obj.generate_specular = True
+                    textures.append(texture_obj)
                 i += 1
 
 
     def getTextures(self):
+        textures = []
         normals = []
         speculars = []
         self.app.updateStateText("Fetching textures")
         texture_path = os.path.join(self.base_path, os.path.join(UNZIP_DIR, 'assets', 'minecraft', 'textures'))
-        self.listTextures(normals, speculars, os.path.join(texture_path, "blocks"))
-        self.listTextures(normals, speculars, os.path.join(texture_path, "block"))
-        self.listTextures(normals, speculars, os.path.join(texture_path, "items"))
-        self.listTextures(normals, speculars, os.path.join(texture_path, "item"))
+        self.listTextures(textures, normals, speculars, os.path.join(texture_path, "blocks"))
+        self.listTextures(textures, normals, speculars, os.path.join(texture_path, "block"))
+        self.listTextures(textures, normals, speculars, os.path.join(texture_path, "items"))
+        self.listTextures(textures, normals, speculars, os.path.join(texture_path, "item"))
         # listTextures(normals, speculars, os.path.join(texture_path, "entities"))
         # listTextures(normals, speculars, os.path.join(texture_path, "entity"))
-        return {'normals': normals, 'speculars': speculars}
+        return textures
