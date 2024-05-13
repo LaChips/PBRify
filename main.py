@@ -50,6 +50,8 @@ def main():
             gvars.window['-CONVERT-'].update(visible=False)
             gvars.window['-CANCEL-'].update(visible=False)
             gvars.window['-EXIT-'].update(visible=True)
+        if (os.getenv("GITHUB_ACTIONS") == "true" or os.getenv("TRAVIS") == "true" or os.getenv("CIRCLECI") == "true" or os.getenv("GITLAB_CI") == "true"):
+            break
     gvars.window.close()
 
 if __name__ == '__main__':
