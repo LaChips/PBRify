@@ -13,4 +13,3 @@ def repackTextures(output_filename):
     if (os.path.isfile(gvars.directory + "/" + output_filename)):
         os.remove(gvars.directory + "/" + output_filename, 'zip')
     shutil.make_archive(gvars.directory + "/" + output_filename, 'zip', os.path.join(gvars.base_path, 'pack_unziped'))
-    gvars.done = True
