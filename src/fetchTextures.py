@@ -1,8 +1,14 @@
 import os
+from PIL import Image
 from os import listdir
 from os.path import isfile, isdir, join
-from src.Texture import texture
-import src.vars as gvars
+from src.texture import Texture
+from src.vars import UNZIP_DIR
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.pbrify import Converter  # This import is only for type checking
 
 excluded_names = [
     "blast_furnace_front_on.png",
@@ -45,30 +51,41 @@ excluded_names = [
     "water_still.png",
 ]
 
-def listTextures(normals, speculars, path):
-    if isdir(path) == True:
-        files = [f for f in listdir(path)]
-        i = 1;
-        for file in files:
-            gvars.window['progress'].update(i, len(files))
-            if (os.path.isdir(join(path, file)) == True):
-                listTextures(normals, speculars, join(path, file))
-            elif ("png" in file and "sapling" not in file and ("mcmeta" not in file) and (file not in excluded_names)and os.path.isfile(join(path, file))):
-                if file.split('.')[0] in gvars.normals:
-                    normals.append(texture(path + "/", file.split('.')[0], '.' + file.split('.')[1]))
-                if file.split('.')[0] in gvars.speculars:
-                    speculars.append(texture(path + "/", file.split('.')[0], '.' + file.split('.')[1]))
-            i = i+1
+class TextureFetcher:
+    def __init__(self, converter : 'Converter'):
+        self.app = converter.app
+        self.config = converter.config
+        self.base_path = self.config.base_path
 
-def getTextures():
-    normals = []
-    speculars = []
-    gvars.window['state'].update(value="Fetching textures")
-    texture_path = os.path.join(gvars.base_path, os.path.join('pack_unziped', 'assets', 'minecraft', 'textures'))
-    listTextures(normals, speculars, os.path.join(texture_path, "blocks"))
-    listTextures(normals, speculars, os.path.join(texture_path, "block"))
-    listTextures(normals, speculars, os.path.join(texture_path, "items"))
-    listTextures(normals, speculars, os.path.join(texture_path, "item"))
-    # listTextures(normals, speculars, os.path.join(texture_path, "entities"))
-    # listTextures(normals, speculars, os.path.join(texture_path, "entity"))
-    return {'normals': normals, 'speculars': speculars}
+    def listTextures(self, textures, normals, speculars, path):
+        if isdir(path):
+            files = [f for f in listdir(path)]
+            i = 1
+            for file in files:
+                self.app.updateProgressBar(i, len(files))
+                if isdir(join(path, file)):
+                    self.listTextures(textures, normals, speculars, join(path, file))
+                elif "png" in file and "sapling" not in file and "mcmeta" not in file and file not in excluded_names and isfile(join(path, file)):
+                    texture_obj = Texture(path + "/", file.split('.')[0], '.' + file.split('.')[1])
+                    # texture_obj.create_thumbnail()  # Generate thumbnail here
+                    if file.split('.')[0] in self.config.normals:
+                        texture_obj.generate_normal = True
+                    if file.split('.')[0] in self.config.speculars:
+                        texture_obj.generate_specular = True
+                    textures.append(texture_obj)
+                i += 1
+
+
+    def getTextures(self):
+        textures = []
+        normals = []
+        speculars = []
+        self.app.updateStateText("Fetching textures")
+        texture_path = os.path.join(self.base_path, os.path.join(UNZIP_DIR, 'assets', 'minecraft', 'textures'))
+        self.listTextures(textures, normals, speculars, os.path.join(texture_path, "blocks"))
+        self.listTextures(textures, normals, speculars, os.path.join(texture_path, "block"))
+        self.listTextures(textures, normals, speculars, os.path.join(texture_path, "items"))
+        self.listTextures(textures, normals, speculars, os.path.join(texture_path, "item"))
+        # listTextures(normals, speculars, os.path.join(texture_path, "entities"))
+        # listTextures(normals, speculars, os.path.join(texture_path, "entity"))
+        return textures

@@ -1,7 +1,13 @@
 import imageio
 import scipy.ndimage
 import numpy as np
-import src.vars as gvars
+from src.texture import Texture
+from src.vars import Config, AppState
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.pbrify import Converter  # This import is only for type checking
 
 def smooth_gaussian(im, sigma):
 
@@ -45,7 +51,7 @@ def sobel(im_smooth):
     return gradient_x,gradient_y
 
 
-def compute_normal_map(gradient_x, gradient_y):
+def compute_normal_map(gradient_x, gradient_y, normal_intensity = 1):
     width = gradient_x.shape[1]
     height = gradient_x.shape[0]
     max_x = np.max(gradient_x)
@@ -58,7 +64,7 @@ def compute_normal_map(gradient_x, gradient_y):
 
     normal_map = np.zeros((height, width, 3), dtype=np.float32)
 
-    intensity = 1 / gvars.normalIntensity
+    intensity = 1 / normal_intensity
 
     strength = max_value / (max_value * intensity)
 
@@ -79,7 +85,7 @@ def compute_normal_map(gradient_x, gradient_y):
     normals = data.astype(np.uint8)
     return normals
 
-def toNormal(texture):
+def toNormal(texture : Texture, intensity):
     sigma = 0
     input_file = texture.path + texture.name + texture.ext
     output_file = texture.path + texture.name + '_n' + texture.ext
@@ -99,17 +105,21 @@ def toNormal(texture):
 
     sobel_x, sobel_y = sobel(im_smooth)
 
-    normal_map = compute_normal_map(sobel_x, sobel_y)
+    normal_map = compute_normal_map(sobel_x, sobel_y, intensity)
     imageio.imwrite(output_file, normal_map)
 
-def createNormals(textures):
-    gvars.window['state'].update(value="Generating normal maps")
+def createNormals(textures, converter : 'Converter'):
+
+    app = converter.app
+    config = converter.config
+
+    app.updateStateText("Generating normal maps")
     for i in range(0, len(textures)):
-        gvars.window['progress'].update(i + 1, len(textures))
-        if textures[i].name not in gvars.normals:
+        app.updateProgressBar(i + 1, len(textures))
+        if textures[i].name not in converter.normals:
             continue
         try:
-            toNormal(textures[i])
+            toNormal(textures[i], config.normalIntensity)
         except SyntaxError:
             print("Broken png file : " + textures[i].path + textures[i].name + textures[i].ext)
         i = i+1

@@ -1,6 +1,7 @@
 import cv2
 from pylab import array, arange, uint8
-import src.vars as gvars
+from src.vars import AppState, Config
+from src.texture import Texture
 from PIL import Image, ImageDraw
 import numpy as np
 import os.path
@@ -12,6 +13,11 @@ from colormath.color_diff import delta_e_cie2000
 from multiprocessing import Process
 
 import numpy
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.pbrify import Converter  # This import is only for type checking
 
 def patch_asscalar(a):
     return a.item()
@@ -42,14 +48,14 @@ def getDistance(color1, color2):
         print("error getting color distance: ", e)
     return d
 
-def closest(colors,c2):
+def closest(colors,c2, fast_specular):
     smallest_idx = -1
     smallest_dist = 10000
     d = 10000
     #print("c2 :", c2)
     for i in range(0, len(colors)):
         #print("colors[i] :", colors[i])
-        if (gvars.fastSpecular):
+        if (fast_specular):
             d = getFastDistance(colors[i], c2)
         else:
             d = getDistance(colors[i], c2)
@@ -74,7 +80,7 @@ def getSpecularForColor(texture_name, color, textures_data):
     else:
         return (0, 0, 0)
 
-def processTexture(texture, i, textures_data):
+def processTexture(texture : Texture, i, textures_data):
     print("texture.name :", texture.name)
     diffuse = None
     try:
@@ -95,11 +101,12 @@ def processTexture(texture, i, textures_data):
             return
     img.save(texture.path + texture.name + '_s' + texture.ext)
 
-def createSpecularMaps(textures):
-    print("fastSpecular :", gvars.fastSpecular)
-    gvars.window['state'].update(value="Generating specular maps")
+def createSpecularMaps(textures, converter : 'Converter'):
+    app = converter.app
+    config = converter.config
+    print("fastSpecular :", config.fastSpecular)
+    app.updateStateText("Generating specular maps")
     for i in range(0, len(textures)):
-        gvars.window['progress'].update(i + 1, len(textures))
-        gvars.window['state'].update(value="Generating specular map for " + textures[i].name)
-        processTexture(textures[i], i, gvars.textures_data)
-        
+        app.updateProgressBar(i + 1, len(textures))
+        app.updateStateText("Generating specular map for " + textures[i].name)
+        processTexture(textures[i], i, converter.textures_data)
