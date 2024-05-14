@@ -19,6 +19,9 @@ def main():
         gvars.base_path = sys._MEIPASS
     except Exception:
         gvars.base_path = os.path.abspath(".")
+    print(os.getenv("GITHUB_ACTIONS"))
+    if (os.getenv("GITHUB_ACTIONS") == "true" or os.getenv("TRAVIS") == "true" or os.getenv("CIRCLECI") == "true" or os.getenv("GITLAB_CI") == "true"):
+        return
     gvars.window = initWindow()
     with open('./lib/normals_to_convert.json', 'r') as normalsToConvertRaw:
         gvars.normals = json.load(normalsToConvertRaw)
@@ -50,8 +53,6 @@ def main():
             gvars.window['-CONVERT-'].update(visible=False)
             gvars.window['-CANCEL-'].update(visible=False)
             gvars.window['-EXIT-'].update(visible=True)
-        if (os.getenv("GITHUB_ACTIONS") == "true" or os.getenv("TRAVIS") == "true" or os.getenv("CIRCLECI") == "true" or os.getenv("GITLAB_CI") == "true"):
-            break
     gvars.window.close()
 
 if __name__ == '__main__':
