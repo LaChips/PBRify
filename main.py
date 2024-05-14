@@ -19,7 +19,7 @@ def main():
         gvars.base_path = sys._MEIPASS
     except Exception:
         gvars.base_path = os.path.abspath(".")
-    print(os.getenv("GITHUB_ACTIONS"))
+    print(f'::set-output name="GITHUB_ACTIONS_ENV::{os.getenv("GITHUB_ACTIONS")}')
     if (os.getenv("GITHUB_ACTIONS") == "true" or os.getenv("TRAVIS") == "true" or os.getenv("CIRCLECI") == "true" or os.getenv("GITLAB_CI") == "true"):
         return
     gvars.window = initWindow()
