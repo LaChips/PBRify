@@ -1,3 +1,4 @@
+import os
 import imageio
 import scipy.ndimage
 import numpy as np
@@ -45,7 +46,7 @@ def sobel(im_smooth):
     return gradient_x,gradient_y
 
 
-def compute_normal_map(gradient_x, gradient_y):
+def compute_normal_map(gradient_x, gradient_y, normalIntensity):
     width = gradient_x.shape[1]
     height = gradient_x.shape[0]
     max_x = np.max(gradient_x)
@@ -58,7 +59,7 @@ def compute_normal_map(gradient_x, gradient_y):
 
     normal_map = np.zeros((height, width, 3), dtype=np.float32)
 
-    intensity = 1 / gvars.normalIntensity
+    intensity = 1 / normalIntensity if normalIntensity > 0 else gvars.normalIntensity
 
     strength = max_value / (max_value * intensity)
 
@@ -99,14 +100,21 @@ def toNormal(texture):
 
     sobel_x, sobel_y = sobel(im_smooth)
 
-    normal_map = compute_normal_map(sobel_x, sobel_y)
+    normal_map = compute_normal_map(sobel_x, sobel_y, texture.normalIntensity)
+    if texture.reversedNormalsRed:
+        normal_map[..., 0] = 1 - normal_map[..., 0]
+    if texture.reversedNormalsGreen:
+        normal_map[..., 1] = 1 - normal_map[..., 1]
+    if texture.reversedNormalsHeight:
+        normal_map[..., 2] = 1 - normal_map[..., 2]
     imageio.imwrite(output_file, normal_map)
 
 def threaded_process(textures):
     for i in range(0, len(textures)):
         gvars.window.write_event_value(('-NORMAL-GENERATION-', textures[i].name + ':' + str(i)), textures[i].name + ':' + str(i))
         #gvars.window['progress'].update(i + 1, len(textures))
-        if textures[i].name not in gvars.normals or textures[i].name in gvars.blocks_to_ignore:
+        textureNameWithRelativePath = textures[i].path.split(os.path.join(gvars.base_path, os.path.join('pack_unziped', 'assets', 'minecraft', 'textures')))[1] + textures[i].name
+        if textures[i].name not in gvars.normals or textureNameWithRelativePath in gvars.blocks_to_ignore:
             continue
         try:
             toNormal(textures[i])
@@ -118,3 +126,7 @@ def threaded_process(textures):
 def createNormals(textures):
     #gvars.window['state'].update(value="Generating normal maps")
     gvars.window.start_thread(lambda: threaded_process(textures), ('-THREAD-', '-NORMAL-THREAD-ENDED-'))
+
+def createNormal(texture):
+    #gvars.window['state'].update(value="Generating normal maps")
+    gvars.window.start_thread(lambda: threaded_process([texture]), ('-THREAD-', '-SINGLE-NORMAL-THREAD-ENDED-'))
