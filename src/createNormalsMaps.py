@@ -87,16 +87,17 @@ def toNormal(texture):
 
     try:
         im = imageio.imread(input_file, pilmode="RGBA")
+        resizedIm = im[:im.shape[1],:im.shape[1]]
     except:
         print("can't read " + texture.name)
         return -1
 
-    if im.ndim == 3:
-        im_grey = np.zeros((im.shape[0],im.shape[1])).astype(float)
-        im_grey = (im[...,0] * 0.3 + im[...,1] * 0.6 + im[...,2] * 0.1)
-        im = im_grey
+    if resizedIm.ndim == 3:
+        im_grey = np.zeros((resizedIm.shape[0],resizedIm.shape[1])).astype(float)
+        im_grey = (resizedIm[...,0] * 0.3 + resizedIm[...,1] * 0.6 + resizedIm[...,2] * 0.1)
+        resizedIm = im_grey
 
-    im_smooth = smooth_gaussian(im, sigma)
+    im_smooth = smooth_gaussian(resizedIm, sigma)
 
     sobel_x, sobel_y = sobel(im_smooth)
 

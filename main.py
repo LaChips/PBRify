@@ -140,12 +140,6 @@ def displaySpecularValues(texture, textureName):
             else:
                 gvars.second_window['-SINGLE-SPECULAR-COLOR-:' + str(valueIndex)].update(background_color=hexColor)
                 gvars.second_window['-SINGLE-SPECULAR-SPECULAR-:' + str(valueIndex)].update(background_color=hexSpecular)
-                # gvars.second_window['-SINGLE-COLOR-RED-:' + str(valueIndex)].update(str(specValue['color'][0]))
-                # gvars.second_window['-SINGLE-SPECULAR-RED-EDIT-:' + str(valueIndex)].update(str(specValue['specular'][0]))
-                # gvars.second_window['-SINGLE-COLOR-GREEN-:' + str(valueIndex)].update(str(specValue['color'][1]))
-                # gvars.second_window['-SINGLE-SPECULAR-GREEN-EDIT-:' + str(valueIndex)].update(str(specValue['specular'][1]))
-                # gvars.second_window['-SINGLE-COLOR-BLUE-:' + str(valueIndex)].update(str(specValue['color'][2]))
-                # gvars.second_window['-SINGLE-SPECULAR-BLUE-EDIT-:' + str(valueIndex)].update(str(specValue['specular'][2]))
         if gvars.editedTextureName == None:
             gvars.second_window.extend_layout(gvars.second_window['-SPECULAR-MAP-VALUES-'], colorAndSpecularBlock)
     

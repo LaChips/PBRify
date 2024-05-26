@@ -64,14 +64,15 @@ def toHeight(texture):
         print("no normal map for " + texture.name)
         return
     diffuse = cv2.imread(texture.path + texture.name + texture.ext, 0)
+    resizedDiffuse = diffuse[:diffuse.shape[1],:diffuse.shape[1]]
     brightness = texture.heightBrightness if texture.heightBrightness > 0 else 1
-    diffuse[diffuse < 255-(int(50 * brightness))] += int(50 * brightness)
+    resizedDiffuse[resizedDiffuse < 255-(int(50 * brightness))] += int(50 * brightness)
     maxIntensity = 255.0 # depends on dtype of image data
     x = arange(maxIntensity) 
     phi = 1
     theta = 1
     contrast = (texture.heightIntensity if texture.heightIntensity > 0 else gvars.heightIntensity)
-    toHeightMap = (maxIntensity/phi)*(diffuse/(maxIntensity/theta))**contrast
+    toHeightMap = (maxIntensity/phi)*(resizedDiffuse/(maxIntensity/theta))**contrast
     heightMap = array(toHeightMap,dtype=uint8)
     if (texture.reversedHeight == True):
         lowest = heightMap.min()
