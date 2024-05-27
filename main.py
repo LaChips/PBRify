@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+from enum import Enum
 import os
 import sys
 import shutil
@@ -96,17 +97,17 @@ def displayMaps(texture, textureName):
     if (os.path.isfile(os.path.join(texture.path, texture.name + '_n' + texture.ext)) == True):
         gvars.second_window['-NORMAL-PREVIEW-'].update(filename=(texture.path + textureName + '_n' + texture.ext), zoom=zoom, subsample=subsample)
     else:
-        gvars.second_window['-NORMAL-PREVIEW-'].update(filename=(os.path.join(gvars.base_path, 'src', 'assets', 'normal_placeholder.png')), zoom=zoom, subsample=subsample)
+        gvars.second_window['-NORMAL-PREVIEW-'].update(filename=(os.path.join(gvars.base_path, 'src', 'assets', 'normal_placeholder.png')))
     if (os.path.isfile(os.path.join(texture.path, texture.name + '_h' + texture.ext)) == True):
         gvars.second_window['-HEIGHT-PREVIEW-'].update(filename=(texture.path + textureName + '_h' + texture.ext), zoom=zoom, subsample=subsample)
     else:
-        gvars.second_window['-HEIGHT-PREVIEW-'].update(filename=(os.path.join(gvars.base_path, 'src', 'assets', 'height_placeholder.png')), zoom=zoom, subsample=subsample)
+        gvars.second_window['-HEIGHT-PREVIEW-'].update(filename=(os.path.join(gvars.base_path, 'src', 'assets', 'height_placeholder.png')))
     if (os.path.isfile(os.path.join(texture.path, texture.name + '_s' + texture.ext)) == True):
         gvars.second_window['-SPECULAR-PREVIEW-'].update(filename=(texture.path + textureName + '_s' + texture.ext), zoom=zoom, subsample=subsample)
     else:
-        gvars.second_window['-SPECULAR-PREVIEW-'].update(filename=(os.path.join(gvars.base_path, 'src', 'assets', 'specular_placeholder.png')), zoom=zoom, subsample=subsample)
+        gvars.second_window['-SPECULAR-PREVIEW-'].update(filename=(os.path.join(gvars.base_path, 'src', 'assets', 'specular_placeholder.png')))
     
-def displaySpecularValues(texture, textureName):
+def displaySpecularValues(texture, textureName): # Would be way easier if we could clear the values layout and recreate it, but PySimpleGUI doesn't allow it
     if (textureName not in gvars.textures_data):
         return
     specValues = texture.customValues.copy() if texture.customValues else gvars.textures_data[textureName].copy()
@@ -119,60 +120,59 @@ def displaySpecularValues(texture, textureName):
             valueIndex = i * 2 + j
             hexColor = '#' + ('{:02X}' * 3).format(specValue['color'][0], specValue['color'][1], specValue['color'][2])
             hexSpecular = '#' + ('{:02X}' * 3).format(specValue['specular'][0], specValue['specular'][1], specValue['specular'][2])
-            if gvars.editedTextureName == None or valueIndex >= gvars.maxSpecularValuesAmount:
+            if gvars.editedTextureName == None or valueIndex >= gvars.maxSpecularValuesAmount: # if first edition or texture has more values than the max amount of values from previous editions
                 colorAndSpecularBlock[0].append(sg.Canvas(size=(120, 50), background_color=hexColor, key='-SINGLE-SPECULAR-COLOR-:' + str(valueIndex)))
                 colorAndSpecularBlock[0].append(sg.Canvas(size=(120, 50), background_color=hexSpecular, key='-SINGLE-SPECULAR-SPECULAR-:' + str(valueIndex)))
                 colorAndSpecularBlock[1].append(sg.Text("R :", size=(3, 1), key='-SINGLE-COLOR-RED-TEXT-:' + str(valueIndex)))
                 colorAndSpecularBlock[1].append(sg.InputText(str(specValue['color'][0]), size=(15, 1), key='-SINGLE-COLOR-RED-EDIT-:' + str(valueIndex), enable_events=True))
-                colorAndSpecularBlock[1].append(sg.InputText(str(specValue['specular'][0]), size=(15, 1), key='-SINGLE-SPECULAR-RED-EDIT-:' + str(valueIndex), enable_events=True))
+                colorAndSpecularBlock[1].append(sg.InputText(str(specValue['specular'][0]), size=(15, 1), key='-SINGLE-SPECULAR-EDIT-:' + str(valueIndex) + ':RED', enable_events=True))
                 colorAndSpecularBlock[2].append(sg.Text("G :", size=(3, 1), key='-SINGLE-COLOR-GREEN-TEXT-:' + str(valueIndex)))
                 colorAndSpecularBlock[2].append(sg.InputText(str(specValue['color'][1]), size=(15, 1), key='-SINGLE-COLOR-GREEN-EDIT-:' + str(valueIndex), enable_events=True))
-                colorAndSpecularBlock[2].append(sg.InputText(str(specValue['specular'][1]), size=(15, 1), key='-SINGLE-SPECULAR-GREEN-EDIT-:' + str(valueIndex), enable_events=True))
+                colorAndSpecularBlock[2].append(sg.InputText(str(specValue['specular'][1]), size=(15, 1), key='-SINGLE-SPECULAR-EDIT-:' + str(valueIndex) + ':GREEN', enable_events=True))
                 colorAndSpecularBlock[3].append(sg.Text("B :", size=(3, 1), key='-SINGLE-COLOR-BLUE-TEXT-:' + str(valueIndex)))
                 colorAndSpecularBlock[3].append(sg.InputText(str(specValue['color'][2]), size=(15, 1), key='-SINGLE-COLOR-BLUE-EDIT-:' + str(valueIndex), enable_events=True))
-                colorAndSpecularBlock[3].append(sg.InputText(str(specValue['specular'][2]), size=(15, 1), key='-SINGLE-SPECULAR-BLUE-EDIT-:' + str(valueIndex), enable_events=True))
-            elif valueIndex >= gvars.specularValuesAmount and valueIndex < gvars.maxSpecularValuesAmount:
+                colorAndSpecularBlock[3].append(sg.InputText(str(specValue['specular'][2]), size=(15, 1), key='-SINGLE-SPECULAR-EDIT-:' + str(valueIndex) + ':BLUE', enable_events=True))
+            elif valueIndex >= gvars.specularValuesAmount and valueIndex < gvars.maxSpecularValuesAmount: # if texture has more values than the previous one but less than the max amount, so we just display the elements again
                 gvars.second_window['-SINGLE-SPECULAR-COLOR-:' + str(valueIndex)].update(visible=True)
                 gvars.second_window['-SINGLE-SPECULAR-SPECULAR-:' + str(valueIndex)].update(visible=True)
                 gvars.second_window['-SINGLE-COLOR-RED-TEXT-:' + str(valueIndex)].update(visible=True)
                 gvars.second_window['-SINGLE-COLOR-RED-EDIT-:' + str(valueIndex)].update(visible=True)
-                gvars.second_window['-SINGLE-SPECULAR-RED-EDIT-:' + str(valueIndex)].update(visible=True)
+                gvars.second_window['-SINGLE-SPECULAR-EDIT-:' + str(valueIndex) + ':RED'].update(visible=True)
                 gvars.second_window['-SINGLE-COLOR-GREEN-TEXT-:' + str(valueIndex)].update(visible=True)
                 gvars.second_window['-SINGLE-COLOR-GREEN-EDIT-:' + str(valueIndex)].update(visible=True)
-                gvars.second_window['-SINGLE-SPECULAR-GREEN-EDIT-:' + str(valueIndex)].update(visible=True)
+                gvars.second_window['-SINGLE-SPECULAR-EDIT-:' + str(valueIndex) + ':GREEN'].update(visible=True)
                 gvars.second_window['-SINGLE-COLOR-BLUE-TEXT-:' + str(valueIndex)].update(visible=True)
                 gvars.second_window['-SINGLE-COLOR-BLUE-EDIT-:' + str(valueIndex)].update(visible=True)
-                gvars.second_window['-SINGLE-SPECULAR-BLUE-EDIT-:' + str(valueIndex)].update(visible=True)
+                gvars.second_window['-SINGLE-SPECULAR-EDIT-:' + str(valueIndex) + ':BLUE'].update(visible=True)
+            if gvars.editedTextureName != None and valueIndex < gvars.maxSpecularValuesAmount: # When we need to update an existing element value
                 gvars.second_window['-SINGLE-COLOR-RED-EDIT-:' + str(valueIndex)].update(value=str(specValue['color'][0]))
-                gvars.second_window['-SINGLE-SPECULAR-RED-EDIT-:' + str(valueIndex)].update(value=str(specValue['specular'][0]))
+                gvars.second_window['-SINGLE-SPECULAR-EDIT-:' + str(valueIndex) + ':RED'].update(value=str(specValue['specular'][0]))
                 gvars.second_window['-SINGLE-COLOR-GREEN-EDIT-:' + str(valueIndex)].update(value=str(specValue['color'][1]))
-                gvars.second_window['-SINGLE-SPECULAR-GREEN-EDIT-:' + str(valueIndex)].update(value=str(specValue['specular'][1]))
+                gvars.second_window['-SINGLE-SPECULAR-EDIT-:' + str(valueIndex) + ':GREEN'].update(value=str(specValue['specular'][1]))
                 gvars.second_window['-SINGLE-COLOR-BLUE-EDIT-:' + str(valueIndex)].update(value=str(specValue['color'][2]))
-                gvars.second_window['-SINGLE-SPECULAR-BLUE-EDIT-:' + str(valueIndex)].update(value=str(specValue['specular'][2]))
+                gvars.second_window['-SINGLE-SPECULAR-EDIT-:' + str(valueIndex) + ':BLUE'].update(value=str(specValue['specular'][2]))
                 gvars.second_window['-SINGLE-SPECULAR-COLOR-:' + str(valueIndex)].update(background_color=hexColor)
                 gvars.second_window['-SINGLE-SPECULAR-SPECULAR-:' + str(valueIndex)].update(background_color=hexSpecular)
-            else:
-                gvars.second_window['-SINGLE-SPECULAR-COLOR-:' + str(valueIndex)].update(background_color=hexColor)
-                gvars.second_window['-SINGLE-SPECULAR-SPECULAR-:' + str(valueIndex)].update(background_color=hexSpecular)
-        if gvars.editedTextureName == None or valueIndex >= gvars.maxSpecularValuesAmount:
+        if gvars.editedTextureName == None or valueIndex >= gvars.maxSpecularValuesAmount: # If there are new values to display (more than previously met), appends them to the layout
             gvars.second_window.extend_layout(gvars.second_window['-SPECULAR-MAP-VALUES-'], colorAndSpecularBlock)
-    if (specValuesAmount < gvars.specularValuesAmount):
+    if (specValuesAmount < gvars.specularValuesAmount): # If there are less values than previously met, hides the elements that are not needed anymore
         for i in range(specValuesAmount, gvars.specularValuesAmount):
             gvars.second_window['-SINGLE-SPECULAR-COLOR-:' + str(i)].update(visible=False)
             gvars.second_window['-SINGLE-SPECULAR-SPECULAR-:' + str(i)].update(visible=False)
             gvars.second_window['-SINGLE-COLOR-RED-EDIT-:' + str(i)].update(visible=False)
             gvars.second_window['-SINGLE-COLOR-GREEN-EDIT-:' + str(i)].update(visible=False)
             gvars.second_window['-SINGLE-COLOR-BLUE-EDIT-:' + str(i)].update(visible=False)
-            gvars.second_window['-SINGLE-SPECULAR-RED-EDIT-:' + str(i)].update(visible=False)
-            gvars.second_window['-SINGLE-SPECULAR-GREEN-EDIT-:' + str(i)].update(visible=False)
-            gvars.second_window['-SINGLE-SPECULAR-BLUE-EDIT-:' + str(i)].update(visible=False)
+            gvars.second_window['-SINGLE-SPECULAR-EDIT-:' + str(i) + ":RED"].update(visible=False)
+            gvars.second_window['-SINGLE-SPECULAR-EDIT-:' + str(i) + ":GREEN"].update(visible=False)
+            gvars.second_window['-SINGLE-SPECULAR-EDIT-:' + str(i) + ":BLUE"].update(visible=False)
             gvars.second_window['-SINGLE-COLOR-RED-TEXT-:' + str(i)].update(visible=False)
             gvars.second_window['-SINGLE-COLOR-GREEN-TEXT-:' + str(i)].update(visible=False)
             gvars.second_window['-SINGLE-COLOR-BLUE-TEXT-:' + str(i)].update(visible=False)
     if (specValuesAmount > gvars.maxSpecularValuesAmount):
         gvars.maxSpecularValuesAmount = specValuesAmount
     gvars.specularValuesAmount = specValuesAmount
-    
+
+SPECULAR_RGB_MAP = Enum('SPECULAR_RGB_MAP', ['RED', 'GREEN', 'BLUE'])
 
 def handleSecondWindowEvents():
     event2, values2 = (None, None)
@@ -230,27 +230,16 @@ def handleSecondWindowEvents():
         gvars.editedTexture.heightIntensity = values2['-SINGLE-HEIGHT-']
     elif event2 == '-SINGLE-HEIGHT-BRIGHTNESS-':
         gvars.editedTexture.heightBrightness = values2['-SINGLE-HEIGHT-BRIGHTNESS-']
-    elif event2.split(':')[0] == '-SINGLE-SPECULAR-RED-EDIT-':
-        try:
-            value = int(values2[event2])
-            gvars.editedTexture.customValues[int(event2.split(':')[1])]['specular'][0] = value
-            gvars.second_window['-SINGLE-SPECULAR-SPECULAR-:' + event2.split(':')[1]].update(background_color='#' + ('{:02X}' * 3).format(value, gvars.editedTexture.customValues[int(event2.split(':')[1])]['specular'][1], gvars.editedTexture.customValues[int(event2.split(':')[1])]['specular'][2]))
-        except:
-            return
-    elif event2.split(':')[0] == '-SINGLE-SPECULAR-GREEN-EDIT-':
-        try:
-            value = int(values2[event2])
-            gvars.editedTexture.customValues[int(event2.split(':')[1])]['specular'][1] = value
-            gvars.second_window['-SINGLE-SPECULAR-SPECULAR-:' + event2.split(':')[1]].update(background_color='#' + ('{:02X}' * 3).format(gvars.editedTexture.customValues[int(event2.split(':')[1])]['specular'][0], value, gvars.editedTexture.customValues[int(event2.split(':')[1])]['specular'][2]))
-        except:
-            return
-    elif event2.split(':')[0] == '-SINGLE-SPECULAR-BLUE-EDIT-':
-        try:
-            value = int(values2[event2])
-            gvars.editedTexture.customValues[int(event2.split(':')[1])]['specular'][2] = value
-            gvars.second_window['-SINGLE-SPECULAR-SPECULAR-:' + event2.split(':')[1]].update(background_color='#' + ('{:02X}' * 3).format(gvars.editedTexture.customValues[int(event2.split(':')[1])]['specular'][0], gvars.editedTexture.customValues[int(event2.split(':')[1])]['specular'][1], value))
-        except:
-            return
+    elif event2.split(':')[0] == '-SINGLE-SPECULAR-EDIT-':
+        value = int(values2[event2]) # R/G/B value
+        customValuesIndex = int(event2.split(':')[1]) # Index of the value in the customValues array
+        colorIndex = SPECULAR_RGB_MAP[event2.split(':')[2]].value - 1 # Index of the color in the RGB array (RED = 0, GREEN = 1, BLUE = 2)
+        gvars.editedTexture.customValues[customValuesIndex]['specular'][colorIndex] = value
+        gvars.second_window['-SINGLE-SPECULAR-SPECULAR-:' + event2.split(':')[1]].update(background_color='#' + ('{:02X}' * 3).format(
+            value if colorIndex == 0 else gvars.editedTexture.customValues[customValuesIndex]['specular'][0], # RED
+            value if colorIndex == 1 else gvars.editedTexture.customValues[customValuesIndex]['specular'][1], # GREEN
+            value if colorIndex == 2 else gvars.editedTexture.customValues[customValuesIndex]['specular'][2] # BLUE
+        ))
     elif event2.split(':')[0] == '-SINGLE-COLOR-RED-EDIT-':
         try:
             value = int(values2[event2])
