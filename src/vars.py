@@ -14,6 +14,8 @@ blocks_to_ignore = []
 blocks_to_ignore_tmp = []
 editedTexture = {}
 editedTextureName = None
+maxSpecularValuesAmount = 0
+specularValuesAmount = 0
 plant_blocks = [
     "\\block/acacia_sapling",
     "\\block/birch_sapling",

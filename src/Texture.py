@@ -8,10 +8,9 @@ class texture:
         self.ext = ext
         self.normalIntensity = 0
         self.heightIntensity = 0
-        self.reversedNormalsRed = False
-        self.reversedNormalsGreen = False
-        self.reversedNormalsHeight = False
-        self.reversedHeight = False
-        self.fastSpecular = False
+        self.reversedNormalsRed = None
+        self.reversedNormalsGreen = None
+        self.reversedHeight = None
+        self.fastSpecular = None
         self.heightBrightness = 0
         self.customValues = None

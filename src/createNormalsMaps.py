@@ -102,12 +102,10 @@ def toNormal(texture):
     sobel_x, sobel_y = sobel(im_smooth)
 
     normal_map = compute_normal_map(sobel_x, sobel_y, texture.normalIntensity)
-    if texture.reversedNormalsRed:
+    if not texture.reversedNormalsRed:
         normal_map[..., 0] = 1 - normal_map[..., 0]
-    if texture.reversedNormalsGreen:
+    if not texture.reversedNormalsGreen:
         normal_map[..., 1] = 1 - normal_map[..., 1]
-    if texture.reversedNormalsHeight:
-        normal_map[..., 2] = 1 - normal_map[..., 2]
     imageio.imwrite(output_file, normal_map)
 
 def threaded_process(textures):

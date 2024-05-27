@@ -28,9 +28,6 @@ def initWindow(screen):
             [sg.Text('Select the textures to exclude')],
             [sg.Button('Unselect all', key='-FILTER_TEXTURES-NONE-'), sg.Button('Select plants', key='-FILTER_TEXTURES-PLANT-')],
         ]
-        #with open(os.path.join(gvars.base_path, 'lib/textures_data.json'), 'r') as json_file:
-            # textures_data = json.loads(json_file.read())
-            # blocks_names = list(textures_data.keys())
         textures = getTextures()
         blocks_names = pluck(textures['diffuses'], 'name')
         blocks_path = pluck(textures['diffuses'], 'path')
@@ -44,7 +41,7 @@ def initWindow(screen):
         layout = [
             [sg.Text('Select the textures to edit (not implemented yet)')],
         ]
-        texturesWithoutIgnored = [x for x in gvars.textures['diffuses'] if x.name not in gvars.blocks_to_ignore]
+        texturesWithoutIgnored = [x for x in gvars.textures['diffuses'] if x.name not in gvars.blocks_to_ignore and x.name in gvars.textures_data]
         textures_names = pluck(texturesWithoutIgnored, 'name')
         blocks_path = pluck(texturesWithoutIgnored, 'path')
         names_with_path = [blocks_path[i].split(os.path.join(gvars.base_path, os.path.join('pack_unziped', 'assets', 'minecraft', 'textures')))[1] + textures_names[i] for i in range(0, len(textures_names))]
@@ -60,13 +57,12 @@ def initWindow(screen):
             [sg.Frame('Textures', imagesLayout)],
             [sg.Checkbox('Invert normals red ', default=False, enable_events=True, key='-INVERT-NORMAL-RED-')],
             [sg.Checkbox('Invert normals green ', default=False, enable_events=True, key='-INVERT-NORMAL-GREEN-')],
-            [sg.Checkbox('Invert normals height ', default=False, enable_events=True, key='-INVERT-NORMAL-HEIGHT-')],
             [sg.Checkbox('Invert height displacement ', default=False, enable_events=True, key='-INVERT-HEIGHT-')],
             [sg.Text('Normal strenght  '), sg.Slider(size=(50, 10), default_value=1, range=(1, 3), resolution=0.001, orientation='h', enable_events=True, key='-SINGLE-NORMAL-')],
             [sg.Text('Height strenght   '), sg.Slider(size=(50, 10), default_value=0.12, range=(0.01, 0.5), resolution=0.001, orientation='h', enable_events=True, key='-SINGLE-HEIGHT-')],
             [sg.Text('Height brightness '), sg.Slider(size=(50, 10), default_value=1, range=(0.01, 3), resolution=0.001, orientation='h', enable_events=True, key='-SINGLE-HEIGHT-BRIGHTNESS-')],
-            [sg.Checkbox('Fast specular map generation (less accurate) ', default=False, enable_events=True, key='-FAST-')],
-            [sg.Col([], key='-SPECULAR-MAP-VALUES-')],
+            [sg.Checkbox('Fast specular map generation (less accurate) ', default=gvars.fastSpecular or False, enable_events=True, key='-SINGLE-FAST-')],
+            [sg.Col([], key='-SPECULAR-MAP-VALUES-', size=(550, 400), scrollable=True, vertical_scroll_only=True, size_subsample_height=1, size_subsample_width=1)],
             [sg.Button('Recompute', key='-CONVERT-TEXTURE-')]
         ]
 

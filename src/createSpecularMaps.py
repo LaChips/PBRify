@@ -41,14 +41,11 @@ def closest(colors,c2, fastSpecular):
     smallest_idx = -1
     smallest_dist = 10000
     d = 10000
-    #print("c2 :", c2)
     for i in range(0, len(colors)):
-        #print("colors[i] :", colors[i])
-        if (gvars.fastSpecular or fastSpecular):
+        if (fastSpecular):
             d = getFastDistance(colors[i], c2)
         else:
             d = getDistance(colors[i], c2)
-        #print("d :" + d)
         if (d < smallest_dist):
             smallest_idx = i
             smallest_dist = d
@@ -69,7 +66,7 @@ def getSpecularForColor(texture_name, color, textures_data, fastSpecular):
     else:
         return (0, 0, 0)
 
-def processTexture(texture, i, textures_data):
+def processTexture(texture, i, textures_data, fastSpecular):
     diffuse = None
     try:
         diffuse = Image.open(r"" + os.path.join(texture.path, texture.name + texture.ext), 'r', ['png']).convert('RGB')
@@ -82,27 +79,26 @@ def processTexture(texture, i, textures_data):
     spec_image = img.load()
     for idx in range(0, size * size):
         try:
-            spec = getSpecularForColor(texture.name, texture_data[idx % size, int(idx / size)], textures_data, texture.fastSpecular)
+            spec = getSpecularForColor(texture.name, texture_data[idx % size, int(idx / size)], textures_data, fastSpecular)
             spec_image[idx % size, int(idx / size)] = (spec[0], spec[1], spec[2])
         except Exception as e:
             print('failed to process ' + texture.name + ":" + str(e))
             return
     img.save(texture.path + texture.name + '_s' + texture.ext)
 
-def threaded_process(textures):
+def threaded_process(textures, fastSpecular):
     for i in range(0, len(textures)):
         textureName = textures[i].path.split(os.path.join(gvars.base_path, os.path.join('pack_unziped', 'assets', 'minecraft', 'textures')))[1] + textures[i].name
         if textureName in gvars.blocks_to_ignore:
             continue
         gvars.window.write_event_value(('-SPECULAR-GENERATION-', textures[i].name + ':' + str(i)), textures[i].name + ':' + str(i))
         if textures[i].customValues:
-            processTexture(textures[i], i, {textures[i].name: textures[i].customValues})
+            processTexture(textures[i], i, {textures[i].name: textures[i].customValues}, fastSpecular)
         else:
-            processTexture(textures[i], i, gvars.textures_data)
-    #gvars.window.write_event_value(('-THREAD-', '-SPECULAR-THREAD-ENDED-'), '-SPECULAR-THREAD-ENDED-')
+            processTexture(textures[i], i, gvars.textures_data, fastSpecular)
 
 def createSpecularMaps(textures):
-    gvars.window.start_thread(lambda: threaded_process(textures), ('-THREAD-', '-SPECULAR-THREAD-ENDED-'))
+    gvars.window.start_thread(lambda: threaded_process(textures, gvars.fastSpecular), ('-THREAD-', '-SPECULAR-THREAD-ENDED-'))
 
 def createSpecularMap(texture):
-    gvars.window.start_thread(lambda: threaded_process([texture]), ('-THREAD-', '-SINGLE-SPECULAR-THREAD-ENDED-'))
+    gvars.window.start_thread(lambda: threaded_process([texture], texture.fastSpecular if texture.fastSpecular != None else gvars.fastSpecular), ('-THREAD-', '-SINGLE-SPECULAR-THREAD-ENDED-'))
