@@ -59,7 +59,7 @@ def compute_normal_map(gradient_x, gradient_y, normalIntensity):
 
     normal_map = np.zeros((height, width, 3), dtype=np.float32)
 
-    intensity = 1 / normalIntensity if normalIntensity > 0 else gvars.normalIntensity
+    intensity = 1 / normalIntensity if normalIntensity != None else gvars.normalIntensity
 
     strength = max_value / (max_value * intensity)
 
@@ -113,7 +113,9 @@ def threaded_process(textures):
         gvars.window.write_event_value(('-NORMAL-GENERATION-', textures[i].name + ':' + str(i)), textures[i].name + ':' + str(i))
         #gvars.window['progress'].update(i + 1, len(textures))
         textureNameWithRelativePath = textures[i].path.split(os.path.join(gvars.base_path, os.path.join('pack_unziped', 'assets', 'minecraft', 'textures')))[1] + textures[i].name
-        if textures[i].name not in gvars.normals or textureNameWithRelativePath in gvars.blocks_to_ignore:
+        # if textures[i].name not in gvars.normals or textureNameWithRelativePath in gvars.blocks_to_ignore:
+        #     continue
+        if textureNameWithRelativePath in gvars.blocks_to_ignore:
             continue
         try:
             toNormal(textures[i])

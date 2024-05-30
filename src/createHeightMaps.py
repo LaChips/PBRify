@@ -56,8 +56,8 @@ import math
 # #     return HM
 
 def toHeight(texture):
-    if texture.name not in gvars.normals:
-        return
+    # if texture.name not in gvars.normals:
+    #     return
     try:
         normal = cv2.imread(texture.path + texture.name + "_n" + texture.ext)
     except:
@@ -65,13 +65,13 @@ def toHeight(texture):
         return
     diffuse = cv2.imread(texture.path + texture.name + texture.ext, 0)
     resizedDiffuse = diffuse[:diffuse.shape[1],:diffuse.shape[1]]
-    brightness = texture.heightBrightness if texture.heightBrightness > 0 else 1
+    brightness = texture.heightBrightness if texture.heightBrightness != None else 1
     resizedDiffuse[resizedDiffuse < 255-(int(50 * brightness))] += int(50 * brightness)
     maxIntensity = 255.0 # depends on dtype of image data
     x = arange(maxIntensity) 
     phi = 1
     theta = 1
-    contrast = (texture.heightIntensity if texture.heightIntensity > 0 else gvars.heightIntensity)
+    contrast = (texture.heightIntensity if texture.heightIntensity != None else gvars.heightIntensity)
     toHeightMap = (maxIntensity/phi)*(resizedDiffuse/(maxIntensity/theta))**contrast
     heightMap = array(toHeightMap,dtype=uint8)
     if (texture.reversedHeight == True):
@@ -98,7 +98,9 @@ def threaded_process(textures):
         gvars.window.write_event_value(('-HEIGHT-GENERATION-', textures[i].name + ':' + str(i)), textures[i].name + ':' + str(i))
         #gvars.window['progress'].update(i + 1, len(textures))
         textureNameWithRelativePath = textures[i].path.split(os.path.join(gvars.base_path, os.path.join('pack_unziped', 'assets', 'minecraft', 'textures')))[1] + textures[i].name
-        if textures[i].name not in gvars.normals or textureNameWithRelativePath in gvars.blocks_to_ignore:
+        # if textures[i].name not in gvars.normals or textureNameWithRelativePath in gvars.blocks_to_ignore:
+        #     continue
+        if textureNameWithRelativePath in gvars.blocks_to_ignore:
             continue
         try:
             toHeight(textures[i])

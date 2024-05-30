@@ -54,10 +54,10 @@ def listTextures(normals, speculars, diffuses, path):
             if (os.path.isdir(join(path, file)) == True):
                 listTextures(normals, speculars, diffuses, join(path, file))
             elif ("png" in file and "sapling" not in file and ("mcmeta" not in file) and (file not in excluded_names)and os.path.isfile(join(path, file))):
-                if file.split('.')[0] in gvars.normals:
-                    normals.append(texture(path + "/", file.split('.')[0], '.' + file.split('.')[1]))
-                if file.split('.')[0] in gvars.speculars:
-                    speculars.append(texture(path + "/", file.split('.')[0], '.' + file.split('.')[1]))
+                ##if file.split('.')[0] in gvars.normals:
+                normals.append(texture(path + "/", file.split('.')[0], '.' + file.split('.')[1]))
+                ##if file.split('.')[0] in gvars.speculars:
+                speculars.append(texture(path + "/", file.split('.')[0], '.' + file.split('.')[1]))
                 diffuses.append(texture(path + "/", file.split('.')[0], '.' + file.split('.')[1]))
             i = i+1
 
