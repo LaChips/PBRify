@@ -3,12 +3,12 @@ import os
 import sys
 import shutil
 import PySimpleGUI as sg
-from blockProcess import handleBlockProcess
-from mainWindowEvents import handleMainWindowEvents
-from secondWindowEvents import handleSecondWindowEvents
+from src.blockProcess import handleBlockProcess
+from src.mainWindowEvents import handleMainWindowEvents
+from src.secondWindowEvents import handleSecondWindowEvents
 from src.initWindow import initWindow
 import src.vars as gvars
-from threadEvents import handleThreadsEvent
+from src.threadEvents import handleThreadsEvent
 
 def main():
     try:

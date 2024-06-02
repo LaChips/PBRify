@@ -1,9 +1,9 @@
-from copyPackAndUnzip import copyPackAndUnzip
-from createSpecularMaps import createSpecularMaps
-from fetchTextures import getTextures
-from initWindow import initWindow
-from pbrify import start
-from repackTextures import repackTextures
+from src.copyPackAndUnzip import copyPackAndUnzip
+from src.createSpecularMaps import createSpecularMaps
+from src.fetchTextures import getTextures
+from src.initWindow import initWindow
+from src.pbrify import start
+from src.repackTextures import repackTextures
 import src.vars as gvars
 import os
 import shutil

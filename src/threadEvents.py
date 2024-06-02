@@ -1,7 +1,7 @@
-from createHeightMaps import createHeightMap, createHeightMaps
-from createNormalsMaps import createNormal, createNormals
+from src.createHeightMaps import createHeightMap, createHeightMaps
+from src.createNormalsMaps import createNormal, createNormals
 import src.vars as gvars
-from textureEditor import displayMaps
+from src.textureEditor import displayMaps
 
 def handleThreadsEvent(event, values):
     if event[1] == '-SPECULAR-THREAD-ENDED-':

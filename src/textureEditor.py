@@ -1,6 +1,7 @@
 import src.vars as gvars
 from PIL import Image
 import os
+import PySimpleGUI as sg
 
 def displayMaps(texture, textureName):
     diffuse = Image.open(r"" + os.path.join(texture.path, texture.name + texture.ext), 'r', ['png']).convert('RGB')

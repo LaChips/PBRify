@@ -1,7 +1,7 @@
 from enum import Enum
-from createSpecularMaps import createSpecularMap
+from src.createSpecularMaps import createSpecularMap
 import src.vars as gvars
-from textureEditor import displayMaps, displaySpecularValues
+from src.textureEditor import displayMaps, displaySpecularValues
 
 SPECULAR_RGB_MAP = Enum('SPECULAR_RGB_MAP', ['RED', 'GREEN', 'BLUE'])
 
