@@ -45,30 +45,32 @@ excluded_names = [
     "water_still.png",
 ]
 
-def listTextures(normals, speculars, path):
+def listTextures(normals, speculars, diffuses, path):
     if isdir(path) == True:
         files = [f for f in listdir(path)]
         i = 1
         for file in files:
             gvars.window['progress'].update(i, len(files))
             if (os.path.isdir(join(path, file)) == True):
-                listTextures(normals, speculars, join(path, file))
+                listTextures(normals, speculars, diffuses, join(path, file))
             elif ("png" in file and "sapling" not in file and ("mcmeta" not in file) and (file not in excluded_names)and os.path.isfile(join(path, file))):
-                if file.split('.')[0] in gvars.normals:
-                    normals.append(texture(path + "/", file.split('.')[0], '.' + file.split('.')[1]))
-                if file.split('.')[0] in gvars.speculars:
-                    speculars.append(texture(path + "/", file.split('.')[0], '.' + file.split('.')[1]))
+                ##if file.split('.')[0] in gvars.normals:
+                normals.append(texture(path + "/", file.split('.')[0], '.' + file.split('.')[1]))
+                ##if file.split('.')[0] in gvars.speculars:
+                speculars.append(texture(path + "/", file.split('.')[0], '.' + file.split('.')[1]))
+                diffuses.append(texture(path + "/", file.split('.')[0], '.' + file.split('.')[1]))
             i = i+1
 
 def getTextures():
     normals = []
     speculars = []
+    diffuses = []
     gvars.window['state'].update(value="Fetching textures")
     texture_path = os.path.join(gvars.base_path, os.path.join('pack_unziped', 'assets', 'minecraft', 'textures'))
-    listTextures(normals, speculars, os.path.join(texture_path, "blocks"))
-    listTextures(normals, speculars, os.path.join(texture_path, "block"))
-    listTextures(normals, speculars, os.path.join(texture_path, "items"))
-    listTextures(normals, speculars, os.path.join(texture_path, "item"))
+    listTextures(normals, speculars, diffuses, os.path.join(texture_path, "blocks"))
+    listTextures(normals, speculars, diffuses, os.path.join(texture_path, "block"))
+    listTextures(normals, speculars, diffuses, os.path.join(texture_path, "items"))
+    listTextures(normals, speculars, diffuses, os.path.join(texture_path, "item"))
     # listTextures(normals, speculars, os.path.join(texture_path, "entities"))
     # listTextures(normals, speculars, os.path.join(texture_path, "entity"))
-    return {'normals': normals, 'speculars': speculars}
+    return {'normals': normals, 'speculars': speculars, 'diffuses': diffuses}
